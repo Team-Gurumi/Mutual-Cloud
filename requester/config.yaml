@@ -1,0 +1,22 @@
+# Kubernetes 접속 설정
+kubeconfig: "~/.kube/config"   # KUBECONFIG 경로. 클러스터 내부에서 돌릴 땐 생략 가능
+namespace: "default"
+
+# 기본 실행 파라미터(명령행 인자로 덮어씀)
+runtime_class: "kata"          # kata 런타임 사용
+image: "ubuntu:20.04"
+command: ["/bin/bash", "-c"]
+args: ["echo 'hello from Kata Container' && sleep 10 && echo 'Job finished'"]
+cpu_request: "500m"
+cpu_limit: "1"
+mem_request: "512Mi"
+mem_limit: "1Gi"
+
+# node_selector (선택 사항): Job을 특정 노드에 스케줄링할 때 사용
+# 예: katacontainers.io/kata-runtime: "true"
+# node_selector:
+#   katacontainers.io/kata-runtime: "true"
+
+# 로그 수집 및 정리 설정
+wait_timeout_seconds: 600      # Job 완료 대기 타임아웃(초)
+delete_after: true             # 완료 후 Job 삭제 여부
