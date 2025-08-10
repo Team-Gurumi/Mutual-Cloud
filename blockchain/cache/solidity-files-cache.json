@@ -1,0 +1,77 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/home/yelin/Mutual-Cloud/blockchain/contracts/NodeRegistry.sol": {
+      "lastModificationDate": 1754767462913,
+      "contentHash": "084674555638185b667a51e8963aa936",
+      "sourceName": "contracts/NodeRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.28"
+      ],
+      "artifacts": [
+        "NodeRegistry"
+      ]
+    },
+    "/home/yelin/Mutual-Cloud/blockchain/contracts/P2PComputeMarket.sol": {
+      "lastModificationDate": 1754767509319,
+      "contentHash": "24dc043603f74d065b3bcfe6d2a14bc2",
+      "sourceName": "contracts/P2PComputeMarket.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.28"
+      ],
+      "artifacts": [
+        "P2PComputeMarket"
+      ]
+    }
+  }
+}
