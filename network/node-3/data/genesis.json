@@ -1,0 +1,24 @@
+{
+  "config": {
+    "chainId": 2025,
+    "berlinBlock": 0,
+    "londonBlock": 0,
+    "parisBlock": 0,
+    "shanghaiBlock": 0,
+    "cancunBlock": 0,
+    "ibft2": {
+      "blockperiodseconds": 2,
+      "epochlength": 30000,
+      "requesttimeoutseconds": 10
+    }
+  },
+  "nonce": "0x0",
+  "timestamp": "0x0",
+  "gasLimit": "0x1fffffffffffff",
+  "difficulty": "0x1",
+  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "coinbase": "0x0000000000000000000000000000000000000000",
+  "baseFeePerGas": "0x0",
+  "extraData": "0xf87ea00000000000000000000000000000000000000000000000000000000000000000f8549477036c9cfcd2def1ca6e1a9437fa0c02ddd71a3c94456fe79771d18f205ef608cca374b555f82d6e37946a6051ddb0595c16da1fb70931291873a4aa8f3594f3cb3b600d6682b61acb62b06fa140c64d2aa311808400000000c0",
+  "alloc": {}
+}
