@@ -1,4 +1,3 @@
-<!-- /templates/prov-detail.html -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -27,7 +26,6 @@
 
   {% if session.get('user_id') %}
     <h2 class="row">이 서버로 작업 요청</h2>
-    <!-- 작업 요청 폼: Flask가 FastAPI에 프록시 호출 -->
     <form action="{{ url_for('submit_job', provider_id=provider.id) }}" method="post" class="box">
       <div class="row">
         <label for="image"><strong>컨테이너 이미지</strong></label><br />

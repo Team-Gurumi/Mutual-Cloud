@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>공급자 목록</title>
-</head>
+<head><meta charset="utf-8"><title>공급자 목록</title></head>
 <body>
   <h1>공급 가능한 서버 목록</h1>
 
-  <!-- 로그인 상태에 따라 분기 -->
   <div style="margin-bottom: 20px;">
     {% if session.get('user_id') %}
       <p>환영합니다, {{ session.get('username') }}님!</p>
@@ -19,7 +16,6 @@
     {% endif %}
   </div>
 
-  <!-- 공급자 리스트 -->
   <div>
     {% for p in providers %}
       <div style="border:1px solid #ccc; padding:10px; margin:10px;">
@@ -29,12 +25,10 @@
         <p>상태: {{ p.status }}</p>
         <p>IP: {{ p.ip_address }}</p>
 
-        <!-- 상세보기 버튼 -->
         <form action="{{ url_for('provider_detail', provider_id=p.id) }}" method="get" style="display:inline;">
           <button type="submit">상세보기</button>
         </form>
 
-        <!-- 작업 요청 폼 -->
         {% if session.get('user_id') %}
           <form action="{{ url_for('submit_job', provider_id=p.id) }}" method="post" style="margin-top:10px;">
             <label>컨테이너 이미지:</label>
@@ -43,7 +37,7 @@
             <label>실행 스크립트:</label><br>
             <textarea name="script" rows="2" cols="40" placeholder="예: echo start; sleep 2; echo done"></textarea><br><br>
 
-            <label>환경 변수 (KEY=VALUE 줄바꿈 구분):</label><br>
+            <label>환경 변수 (KEY=VALUE 줄바꿈):</label><br>
             <textarea name="env" rows="2" cols="40" placeholder="FOO=BAR&#10;HELLO=WORLD"></textarea><br><br>
 
             <button type="submit">이 공급자에게 작업 요청</button>
