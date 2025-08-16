@@ -1,0 +1,5 @@
+# kubeadm join 명령을 환경변수로 정의한다.
+# control-plane에서 출력된 명령을 = 뒤에 그대로 붙여서 사용한다.
+
+KUBEADM_JOIN="kubeadm join <CP_IP>:6443 --token <TOKEN> \
+  --discovery-token-ca-cert-hash sha256:<HASH>"

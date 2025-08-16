@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kata-job-template
+  namespace: default
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      runtimeClassName: kata
+      nodeSelector:
+        katacontainers.io/kata-runtime: "true"
+      restartPolicy: Never
+      containers:
+      - name: runner
+        image: ubuntu:20.04
+        command: ["/bin/bash", "-c"]
+        args: ["echo hello-from-kata-template && sleep 5"]
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"

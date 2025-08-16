@@ -1,0 +1,4 @@
+Flask
+PyYAML
+kubernetes
+gunicorn # 프로덕션 환경에서 WSGI 서버로 사용
