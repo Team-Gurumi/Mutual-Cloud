@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kata-test
+spec:
+  runtimeClassName: kata
+  containers:
+  - name: box
+    image: alpine
+    command: ["sh","-c","uname -a && sleep 3600"]
