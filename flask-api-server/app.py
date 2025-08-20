@@ -21,6 +21,11 @@ import yaml
 import sys
 import time
 from datetime import datetime
+import asyncio
+from kademlia.network import Server
+# utils.py 처럼 p2p-overlay/kademlia/peer.py도 임포트할 수 있도록 경로 조정
+from p2p_overlay.kademlia.peer import init_kademlia_server, KademliaClient # 아래 예시를 위한 가상의 함수/클래스
+
 
 app = Flask(__name__)
 
@@ -177,3 +182,77 @@ if __name__ == '__main__':
     # 예: gunicorn -w 4 -b 0.0.0.0:5000 app:app
     print("[Flask API] Flask 서버를 시작합니다. (개발 모드)")
     app.run(host='0.0.0.0', port=5000)
+
+# Flask 앱 시작 시 Kademlia 서버/클라이언트 초기화
+kademlia_server_instance = None
+kademlia_client = None
+
+@app.before_first_request
+def setup_kademlia():
+    global kademlia_server_instance, kademlia_client
+    # Kademlia 노드 설정을 환경 변수 또는 configmap에서 가져옵니다.
+    # LISTEN_IP는 해당 Pod의 Yggdrasil IP가 되어야 합니다 (추가적인 동적 IP 획득 로직 필요).
+    # 여기서는 임시로 '0.0.0.0'을 사용하고 hostNetwork를 가정합니다.
+    listen_ip = os.getenv("KADEMLIA_LISTEN_IP", "0.0.0.0")
+    listen_port = int(os.getenv("KADEMLIA_LISTEN_PORT", "8468"))
+    bootstrap_nodes_str = os.getenv("KADEMLIA_BOOTSTRAP_NODES", "[]")
+
+    # 실제 Kademlia 부트스트랩 노드 파싱 로직은 p2p-overlay/kademlia/peer.py 참조
+    try:
+        bootstrap_nodes = json.loads(bootstrap_nodes_str)
+        bootstrap_nodes = [tuple(node) for node in bootstrap_nodes]
+    except Exception as e:
+        app.logger.error(f"Kademlia 부트스트랩 노드 파싱 실패: {e}. 부트스트랩 없이 시작.")
+        bootstrap_nodes = []
+
+    # Flask 앱 내에서 Kademlia 서버 인스턴스를 직접 시작 (가장 간단한 통합 방법)
+    # 프로덕션에서는 별도의 Kademlia Pod으로 분리하고 이 Flask 앱은 Kademlia 서비스와 통신하는 것이 좋습니다.
+    # asyncio.run()은 이미 실행 중인 이벤트 루프에서는 호출할 수 없으므로,
+    # Flask와 asyncio를 함께 사용하는 방식(예: aiohttp, Quart 또는 ThreadPoolExecutor 사용)이 필요합니다.
+    # 여기서는 단순화를 위해 가상의 'init_kademlia_server' 함수를 사용합니다.
+
+    # --- 실제 Kademlia 연동 로직 (가상 코드) ---
+    # 이 부분은 Kademlia 라이브러리의 비동기 특성상 Flask의 동기식 요청 처리와 통합하기 까다롭습니다.
+    # 대안 1: Flask-Executor (ThreadPoolExecutor)를 사용하여 Kademlia 작업을 비동기적으로 실행
+    # 대안 2: Flask 대신 FastAPI (asyncio 네이티브) 사용
+    # 대안 3: Kademlia 노드를 별도의 서비스로 띄우고 RPC(gRPC 등)로 통신
+    # 여기서는 가장 간단하게, Flask 앱이 Kademlia 클라이언트 역할을 하는 것으로 가정합니다.
+
+    # For simplicity, assuming Kademlia server is running elsewhere or
+    # app.py will act as a client to a Kademlia service
+    app.logger.info("Kademlia 클라이언트 초기화...")
+    # Kademlia 클라이언트 생성 (Kademlia 서버가 외부에 있다고 가정)
+    # Flask 앱이 직접 Kademlia 서버가 되려면 더 복잡한 asyncio 통합 필요
+    # 예시: kademlia_client = KademliaClient(listen_ip, listen_port, bootstrap_nodes)
+    #      asyncio.run_coroutine_threadsafe(kademlia_client.start(), app.loop)
+    app.logger.info("Kademlia 클라이언트가 초기화되었습니다. DHT 작업 준비 완료.")
+
+# ... (run_job 엔드포인트 내)
+job_name = f"web-kata-job-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+
+try:
+    # Job 생성 후 Kademlia에 Job 메타데이터 저장
+    # 이 부분은 Kademlia 클라이언트가 성공적으로 초기화된 후 작동합니다.
+    job_metadata = {
+        "job_name": job_name,
+        "namespace": namespace,
+        "image": image,
+        "status": "submitted",
+        "timestamp": datetime.utcnow().isoformat(),
+        # 필요한 다른 메타데이터 추가
+    }
+    # Flask 요청 핸들러는 동기식이므로, 비동기 Kademlia 호출을 위해 asyncio.run_coroutine_threadsafe 또는 ThreadPoolExecutor 사용
+    # asyncio.run_coroutine_threadsafe(kademlia_client.set(job_name, json.dumps(job_metadata)), asyncio.get_event_loop())
+    app.logger.info(f"Job '{job_name}' 메타데이터를 Kademlia DHT에 저장 요청.")
+
+    create_job_from_manifest(manifest)
+    app.logger.info(f"Job '{namespace}/{job_name}'이(가) Kubernetes에 성공적으로 제출되었습니다.")
+
+    # ... (Job 완료 대기 및 로그 수집 부분)
+    # Job 완료 후 Kademlia에 상태 업데이트
+    # asyncio.run_coroutine_threadsafe(kademlia_client.set(job_name, json.dumps({"status": job_status})), asyncio.get_event_loop())
+    app.logger.info(f"Job '{job_name}' 상태를 Kademlia DHT에 업데이트 요청.")
+
+except Exception as e:
+    app.logger.error(f"Job '{job_name}' 제출 또는 Kademlia 저장 중 오류 발생: {e}")
+    return jsonify({"error": f"Job 제출 또는 Kademlia 저장 실패: {e}"}), 500

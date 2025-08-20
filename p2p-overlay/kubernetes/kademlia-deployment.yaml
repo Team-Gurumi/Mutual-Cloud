@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kademlia-node
+  labels:
+    app: kademlia-node
+spec:
+  replicas: 2 # 안정적인 DHT 구성을 위해 최소 2개 이상의 노드를 권장합니다.
+  selector:
+    matchLabels:
+      app: kademlia-node
+  template:
+    metadata:
+      labels:
+        app: kademlia-node
+    spec:
+      # hostNetwork를 사용하여 Pod이 호스트의 네트워크 네임스페이스를 공유합니다.
+      # 이는 Yggdrasil IP를 통해 Kademlia 노드 간 직접 통신을 가능하게 합니다.
+      hostNetwork: true 
+      # hostNetwork: true 일 때는 dnsPolicy를 ClusterFirstWithHostNet으로 설정하는 것이 일반적입니다.
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: kademlia-peer
+        image: your-registry/kademlia-node:latest # p2p-overlay/kademlia/Dockerfile로 빌드한 이미지
+        imagePullPolicy: Always # 개발 중에는 Always로 설정하여 항상 최신 이미지를 가져오도록 할 수 있습니다.
+        env:
+        # Kademlia 리스닝 IP: hostNetwork를 사용하므로 0.0.0.0으로 리스닝.
+        # peer.py에서 실제 Yggdrasil IP를 찾아 사용하거나, 
+        # Pod이 호스트 네트워크를 통해 직접 Yggdrasil 인터페이스로 통신하게 됩니다.
+        - name: KADEMLIA_LISTEN_IP
+          value: "0.0.0.0" 
+        - name: KADEMLIA_LISTEN_PORT
+          value: "8468"
+        # 부트스트랩 노드 목록: Kademlia 네트워크의 다른 노드 Yggdrasil IP와 포트 쌍의 JSON 문자열
+        # 여러 노드 배포 시, 이 값들을 클러스터 내 다른 Kademlia 노드들의 Yggdrasil IP로 업데이트해야 합니다.
+        # 예: '[["[200:abcd:1234::1]", 8468], ["[200:abcd:5678::1]", 8468]]'
+        # 첫 배포 시에는 빈 리스트이거나, 고정된 몇몇 노드를 부트스트랩으로 지정합니다.
+        - name: KADEMLIA_BOOTSTRAP_NODES
+          value: "[]" # 초기에는 빈 리스트. 이후 다른 노드 배포 시 Yggdrasil IP로 업데이트
+        # 노드 ID 생성 전략: configmap에서 읽거나 여기서 명시 (환경 변수가 configmap보다 우선)
+        - name: KADEMLIA_NODE_ID_STRATEGY
+          valueFrom:
+            configMapKeyRef:
+              name: kademlia-config
+              key: node_id_strategy
+        # Yggdrasil PublicKey (node_id_strategy가 'from_public_key'일 경우 필요)
+        # Yggdrasil DaemonSet Pod의 Yggdrasil Public Key를 가져와 여기에 주입해야 합니다.
+        # Downward API나 Init Container를 통해 동적으로 가져오는 고급 설정이 필요할 수 있습니다.
+        - name: YGGDRASIL_PUBLIC_KEY
+          value: "" # Yggdrasil 설치 후 해당 노드의 Public Key를 여기에 입력하거나 동적으로 주입
+        ports:
+        - containerPort: 8468
+          protocol: UDP
+          hostPort: 8468 # hostNetwork 사용 시 호스트의 포트를 직접 사용 (다른 서비스와 충돌 주의)
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+      # Kademlia 노드를 특정 노드에 스케줄링하고 싶다면 nodeSelector/tolerations 사용
+      # 예시: control plane에 배포 시 (컨트롤 플레인 Taint 허용)
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+      # nodeSelector:
+      #   kubernetes.io/hostname: <컨트롤-플레인-노드-이름>

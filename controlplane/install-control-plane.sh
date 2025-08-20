@@ -146,4 +146,7 @@ kubectl label node "${NODE_NAME}" katacontainers.io/kata-runtime=true --overwrit
 # 워커 조인을 위한 join 명령 출력
 kubeadm token create --print-join-command || true
 
+log "X/X Yggdrasil 설치 및 설정" # 기존 단계 번호에 맞춰 조정
+"$(cd "$(dirname "$0")" && pwd)"/../p2p-overlay/yggdrasil/install-yggdrasil.sh
+
 log "설치 완료"

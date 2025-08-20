@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kademlia-config
+  namespace: default # Kademlia Pod가 배포될 네임스페이스와 동일하게 설정
+data:
+  # config.yaml의 내용을 여기에 문자열로 정의합니다.
+  # Pod의 환경 변수나 볼륨으로 마운트될 수 있습니다.
+  config.yaml: |
+    # Kademlia 노드의 리스닝 포트 (UDP)
+    listen_port: 8468
+
+    # 노드 ID 생성 방식 (옵션): 'random' 또는 'from_public_key'
+    # 'from_public_key' 선택 시, Yggdrasil PublicKey를 기반으로 ID를 생성합니다.
+    node_id_strategy: "random"
+    
+    # 부트스트랩 노드 목록은 환경 변수로 주입되므로 여기서는 비워둡니다.
+    # bootstrap_nodes: []
