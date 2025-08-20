@@ -1,0 +1,23 @@
+# Kademlia 노드의 리스닝 IP 주소
+# 컨테이너 내부에서는 '0.0.0.0'으로 리스닝하여 모든 네트워크 인터페이스를 수신하고,
+# Kubernetes Pod이 hostNetwork를 사용하거나 Kademlia Service를 통해 Yggdrasil IP로 접근하도록 구성합니다.
+# hostNetwork: true를 사용하면 Pods는 호스트 노드의 네트워크 스택을 직접 사용한다. 
+# 0.0.0.0으로 listen하면 노드의 실제 yggdrasil ip를 포함해서 모든 ip로 들어오는 kademlia 트레픽을 처리할 수 있다. 
+# false(기본값)에서 Pod은 자체적인 네트워크 네임스페이스와 IP 주소(Pod IP)를 가집니다. 0.0.0.0으로 리스닝하면 Pod IP를 통해 트래픽을 받게 됩니다. 다른 Kademlia 노드들은 이 Pod IP나 Kubernetes Service IP를 통해 통신해야 합니다. Yggdrasil P2P 통신은 주로 IPv6 기반의 Yggdrasil IP를 사용하므로, Kademlia 노드도 이 Yggdrasil IP로 통신해야 합니다. 이를 위해서는 hostNetwork: true 설정이 필수적이거나, Yggdrasil Sidecar 프록시 등의 더 복잡한 네트워크 설정이 필요합니다. 따라서 Kademlia 노드에는 hostNetwork: true 설정이 권장됩니다.
+listen_ip: "0.0.0.0"
+
+# Kademlia 노드의 리스닝 포트 (UDP 프로토콜 사용)
+listen_port: 8468
+
+# Kademlia 네트워크에 처음 조인할 때 사용할 부트스트랩 노드 목록
+# 다른 Kademlia 노드들의 Yggdrasil IP와 포트 쌍의 리스트입니다.
+# 첫 번째 Kademlia 노드를 배포할 경우에는 이 목록을 비워둡니다.
+# Kubernetes Deployment에서 KADEMLIA_BOOTSTRAP_NODES 환경 변수로 주입될 때 JSON 문자열로 변환됩니다.
+# 예시: '[["[200:abcd:1234::1]", 8468], ["[200:abcd:5678::1]", 8468]]'
+bootstrap_nodes: []
+
+# 노드 ID 생성 방식 (옵션): 'random' 또는 'from_public_key'
+# 'from_public_key'를 선택하면, Yggdrasil PublicKey를 기반으로 Kademlia ID를 생성하여,
+# Yggdrasil 주소와 Kademlia ID 간의 연관성을 가질 수 있습니다.
+# 이 경우, peer.py 스크립트는 Yggdrasil PublicKey를 환경 변수로 받아야 합니다.
+node_id_strategy: "random"
